@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кодекс Тейвата — Справочник для НРИ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Comfortaa:wght@400;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        genshin: {
+                            bg: '#0c101c',
+                            card: '#161c2e',
+                            cardHover: '#1f273e',
+                            gold: '#ece5d8',
+                            goldAccent: '#d3bc8e',
+                            goldDark: '#9c814e',
+                            pyro: '#ec4923',
+                            hydro: '#00c3ff',
+                            anemo: '#33d7a0',
+                            electro: '#b440ff',
+                            dendro: '#a5c83b',
+                            cryo: '#76e1fc',
+                            geo: '#fab62c'
+                        }
+                    },
+                    fontFamily: {
+                        title: ['Cinzel', 'serif'],
+                        genshinFont: ['Comfortaa', 'cursive', 'sans-serif'],
+                        sans: ['Noto Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styling & Genshin aesthetics */
+        body {
+            background-color: #0c101c;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(211, 188, 142, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(0, 195, 255, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 0% 100%, rgba(180, 64, 255, 0.04) 0%, transparent 40%);
+            color: #ece5d8;
+        }
+
+        .genshin-border {
+            border: 1px solid rgba(211, 188, 142, 0.25);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(211, 188, 142, 0.03);
+        }
+
+        .genshin-border-active {
+            border-color: #d3bc8e;
+            box-shadow: 0 0 15px rgba(211, 188, 142, 0.3);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #ece5d8 50%, #d3bc8e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .element-badge {
+            transition: all 0.2s ease;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(12, 16, 28, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(211, 188, 142, 0.3);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(211, 188, 142, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased custom-scrollbar">
+
+    <!-- Header Section -->
+    <header class="border-b border-genshin-goldDark/30 bg-genshin-bg/90 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- Title & Logo -->
+                <div class="flex items-center gap-3 text-center md:text-left">
+                    <div class="w-12 h-12 rounded-full border border-genshin-goldAccent/60 flex items-center justify-center bg-genshin-card shadow-lg text-genshin-goldAccent">
+                        <i class="fa-solid font-bold text-2xl fa-book-bookmark"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-title text-2xl sm:text-3xl font-bold tracking-wider gold-gradient-text">
+                            КОДЕКС ТЕЙВАТА
+                        </h1>
+                        <p class="text-xs text-genshin-goldDark tracking-widest uppercase">Справочник Терминов & Lore для НРИ</p>
+                    </div>
+                </div>
+
+                <!-- Controls & Search Bar -->
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <!-- GM Mode Toggle -->
+                    <button id="toggleGmModeBtn" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-genshin-goldDark/50 bg-genshin-card hover:bg-genshin-cardHover text-xs font-bold text-genshin-goldAccent transition flex items-center justify-center gap-2 shadow-md">
+                        <i class="fa-solid fa-user-ninja"></i>
+                        <span id="gmModeStatusText">Режим ГМ: Выкл</span>
+                    </button>
+
+                    <!-- Reset Data Button (GM Only) -->
+                    <button id="resetDataBtn" class="hidden w-full sm:w-auto px-3 py-2.5 rounded-xl border border-red-500/30 bg-red-950/30 hover:bg-red-900/40 text-xs font-semibold text-red-300 transition items-center justify-center gap-1.5" title="Сбросить все термины к исходным">
+                        <i class="fa-solid fa-rotate-left"></i> Сброс
+                    </button>
+
+                    <!-- Search Bar -->
+                    <div class="relative w-full sm:w-64 lg:w-80">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-genshin-goldDark">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <input type="text" id="searchInput" 
+                            class="w-full pl-10 pr-10 py-2.5 bg-genshin-card/80 border border-genshin-goldDark/40 rounded-xl text-genshin-gold placeholder-genshin-goldDark/70 text-sm focus:outline-none focus:border-genshin-goldAccent focus:ring-1 focus:ring-genshin-goldAccent transition duration-200"
+                            placeholder="Поиск понятия, архонта...">
+                        <button id="clearSearch" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-genshin-goldDark hover:text-genshin-goldAccent">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Filter -->
+            <div class="mt-5 flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar text-xs sm:text-sm">
+                <button data-category="all" class="filter-btn px-4 py-1.5 rounded-full bg-genshin-goldAccent text-genshin-bg font-semibold shadow transition duration-200 whitespace-nowrap">
+                    <i class="fa-solid fa-border-all mr-1.5"></i>Все термины
+                </button>
+                <button data-category="concepts" class="filter-btn px-4 py-1.5 rounded-full bg-genshin-card hover:bg-genshin-cardHover text-genshin-gold border border-genshin-goldDark/30 transition duration-200 whitespace-nowrap">
+                    <i class="fa-solid fa-globe mr-1.5 text-genshin-hydro"></i>Понятия мира
+                </button>
+                <button data-category="entities" class="filter-btn px-4 py-1.5 rounded-full bg-genshin-card hover:bg-genshin-cardHover text-genshin-gold border border-genshin-goldDark/30 transition duration-200 whitespace-nowrap">
+                    <i class="fa-solid fa-crown mr-1.5 text-genshin-geo"></i>Боги и Сущности
+                </button>
+                <button data-category="elements" class="filter-btn px-4 py-1.5 rounded-full bg-genshin-card hover:bg-genshin-cardHover text-genshin-gold border border-genshin-goldDark/30 transition duration-200 whitespace-nowrap">
+                    <i class="fa-solid fa-bolt mr-1.5 text-genshin-electro"></i>Элементы и Механики
+                </button>
+                <button data-category="factions" class="filter-btn px-4 py-1.5 rounded-full bg-genshin-card hover:bg-genshin-cardHover text-genshin-gold border border-genshin-goldDark/30 transition duration-200 whitespace-nowrap">
+                    <i class="fa-solid fa-shield-halberd mr-1.5 text-genshin-pyro"></i>Фракции и Организации
+                </button>
+                <button data-category="favorites" class="filter-btn px-4 py-1.5 rounded-full bg-genshin-card hover:bg-genshin-cardHover text-genshin-gold border border-genshin-goldDark/30 transition duration-200 whitespace-nowrap text-amber-400">
+                    <i class="fa-solid fa-star mr-1.5"></i>Избранное (<span id="favCount">0</span>)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Welcome Banner for Players -->
+        <div class="mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-genshin-card via-genshin-card/90 to-genshin-card border border-genshin-goldDark/30 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 text-genshin-goldDark/10 text-9xl pointer-events-none font-title">T</div>
+            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold font-title text-genshin-goldAccent mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-compass"></i> Памятка Путешественника
+                    </h2>
+                    <p class="text-sm text-genshin-gold/80 max-w-3xl leading-relaxed">
+                        Забыли, чем Адепты отличаются от Архонтов, или как работают артерии земли? 
+                        Используйте этот кодекс прямо во время партии! Нажмите на любую карточку, чтобы открыть полные подробности и подсказки по игре.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <!-- Add Term Button (visible in GM mode) -->
+                    <button id="addNewTermBtn" class="hidden px-4 py-2 bg-genshin-goldAccent hover:bg-genshin-goldDark text-genshin-bg font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-plus"></i> Добавить термин
+                    </button>
+                    <button id="randomTermBtn" class="px-4 py-2 bg-genshin-goldDark/20 hover:bg-genshin-goldDark/40 border border-genshin-goldAccent/40 rounded-xl text-xs font-semibold text-genshin-goldAccent transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-dice"></i> Случайный термин
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Term Grid -->
+        <div id="termsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Content populated by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-genshin-card border border-genshin-goldDark/30 flex items-center justify-center text-genshin-goldDark text-2xl">
+                <i class="fa-solid fa-ghost"></i>
+            </div>
+            <h3 class="text-lg font-bold text-genshin-gold">Ничего не найдено</h3>
+            <p class="text-sm text-genshin-goldDark mt-1">Попробуйте изменить поисковый запрос или выбрать другую категорию.</p>
+        </div>
+    </main>
+
+    <!-- Detailed Modal -->
+    <div id="detailModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-genshin-card border border-genshin-goldAccent rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-200">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-genshin-goldDark/30 flex items-start justify-between bg-genshin-bg/40">
+                <div class="flex items-center gap-4">
+                    <div id="modalIcon" class="w-14 h-14 rounded-2xl bg-genshin-bg border border-genshin-goldDark/40 flex items-center justify-center text-2xl text-genshin-goldAccent">
+                        <!-- Icon -->
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="modalCategory" class="text-xs uppercase font-semibold text-genshin-goldDark tracking-wider">Категория</span>
+                            <span id="modalElement" class="hidden text-xs px-2 py-0.5 rounded-full font-bold"></span>
+                        </div>
+                        <h2 id="modalTitle" class="text-2xl font-bold font-title text-genshin-gold text-amber-100">Название термина</h2>
+                        <p id="modalSub" class="text-xs text-genshin-goldDark italic">Оригинальное / альтернативное название</p>
+                    </div>
+                </div>
+                <button id="closeModal" class="w-8 h-8 rounded-full bg-genshin-bg/80 border border-genshin-goldDark/40 flex items-center justify-center text-genshin-goldDark hover:text-genshin-gold hover:border-genshin-goldAccent transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6 text-sm leading-relaxed">
+                <!-- Summary -->
+                <div class="p-4 rounded-xl bg-genshin-bg/60 border border-genshin-goldDark/20">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-genshin-goldAccent mb-1">Краткая суть</h4>
+                    <p id="modalSummary" class="text-genshin-gold font-medium"></p>
+                </div>
+
+                <!-- Deep Lore -->
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-genshin-goldAccent mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-scroll"></i> Подробный лор мира
+                    </h4>
+                    <p id="modalLore" class="text-genshin-gold/90 whitespace-pre-line"></p>
+                </div>
+
+                <!-- D&D / TTRPG Impact -->
+                <div class="p-4 rounded-xl bg-amber-950/20 border border-amber-500/30">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-dice-d20"></i> Значение в игре (Для Игроков)
+                    </h4>
+                    <p id="modalTtrpg" class="text-amber-100/90"></p>
+                </div>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-genshin-goldDark/20" id="modalTags">
+                    <!-- Dynamic tags -->
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-genshin-goldDark/30 bg-genshin-bg/40 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <button id="modalFavBtn" class="px-4 py-2 rounded-xl border border-genshin-goldDark/40 text-xs font-semibold flex items-center gap-2 hover:bg-genshin-goldDark/20 transition">
+                        <i class="fa-regular fa-star"></i> В избранное
+                    </button>
+                    <button id="modalEditBtn" class="hidden px-4 py-2 rounded-xl border border-amber-500/40 bg-amber-950/20 text-amber-300 text-xs font-semibold items-center gap-2 hover:bg-amber-900/40 transition">
+                        <i class="fa-solid fa-pen-to-square"></i> Редактировать
+                    </button>
+                </div>
+                <button id="modalCloseBtn" class="px-5 py-2 bg-genshin-goldAccent hover:bg-genshin-goldDark text-genshin-bg font-bold rounded-xl text-xs transition">
+                    Понятно
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GM Edit / Create Term Modal -->
+    <div id="editModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-genshin-card border border-genshin-goldAccent rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden">
+            <div class="p-5 border-b border-genshin-goldDark/30 flex items-center justify-between bg-genshin-bg/50">
+                <h3 id="editModalTitle" class="text-xl font-bold font-title text-genshin-goldAccent">Редактирование термина</h3>
+                <button id="closeEditModal" class="w-8 h-8 rounded-full bg-genshin-bg/80 border border-genshin-goldDark/40 flex items-center justify-center text-genshin-goldDark hover:text-genshin-gold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="termForm" class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs">
+                <input type="hidden" id="formTermId">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-genshin-goldDark mb-1">Название (Русский)*</label>
+                        <input type="text" id="formTitle" required class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none" placeholder="например: Глаз Бога">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-genshin-goldDark mb-1">Оригинальное / Доп. название</label>
+                        <input type="text" id="formSubTitle" class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none" placeholder="например: Vision (神之眼)">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-bold text-genshin-goldDark mb-1">Категория*</label>
+                        <select id="formCategory" class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none">
+                            <option value="concepts">Понятие мира</option>
+                            <option value="entities">Боги и Сущности</option>
+                            <option value="elements">Элементы и Механики</option>
+                            <option value="factions">Фракции и Организации</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-genshin-goldDark mb-1">Элемент / Стиль*</label>
+                        <select id="formElement" class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none">
+                            <option value="geo">Гео (Geo)</option>
+                            <option value="pyro">Пиро (Pyro)</option>
+                            <option value="hydro">Гидро (Hydro)</option>
+                            <option value="anemo">Анемо (Anemo)</option>
+                            <option value="electro">Электро (Electro)</option>
+                            <option value="dendro">Дендро (Dendro)</option>
+                            <option value="cryo">Крио (Cryo)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-genshin-goldDark mb-1">Иконка (FontAwesome)*</label>
+                        <select id="formIcon" class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none">
+                            <option value="fa-gem">💎 Самоцвет (fa-gem)</option>
+                            <option value="fa-crown">👑 Корона (fa-crown)</option>
+                            <option value="fa-dragon">🐉 Дракон (fa-dragon)</option>
+                            <option value="fa-shield-halberd">🛡️ Щит/Оружие (fa-shield-halberd)</option>
+                            <option value="fa-bolt">⚡ Молния (fa-bolt)</option>
+                            <option value="fa-ghost">👻 Дух (fa-ghost)</option>
+                            <option value="fa-wand-magic-sparkles">🪄 Магия (fa-wand-magic-sparkles)</option>
+                            <option value="fa-scroll">📜 Свиток (fa-scroll)</option>
+                            <option value="fa-skull">💀 Череп (fa-skull)</option>
+                            <option value="fa-coins">🪙 Монета (fa-coins)</option>
+                            <option value="fa-globe">🌐 Мир (fa-globe)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-genshin-goldDark mb-1">Краткая суть (Отображается на карточке)*</label>
+                    <textarea id="formSummary" rows="2" required class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none" placeholder="Краткое определение в 1-2 предложения..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-genshin-goldDark mb-1">Подробный Лор*</label>
+                    <textarea id="formLore" rows="4" required class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none" placeholder="Полная история и лор термина..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-amber-400 mb-1">Значение в игре / Подсказка для D&D*</label>
+                    <textarea id="formTtrpg" rows="3" required class="w-full p-2.5 bg-genshin-bg border border-amber-500/40 rounded-xl text-amber-100 focus:border-amber-400 focus:outline-none" placeholder="Как использовать термин в механике НРИ или отыгрыше..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-genshin-goldDark mb-1">Теги (через запятую)</label>
+                    <input type="text" id="formTags" class="w-full p-2.5 bg-genshin-bg border border-genshin-goldDark/40 rounded-xl text-genshin-gold focus:border-genshin-goldAccent focus:outline-none" placeholder="Магия, Артефакт, Снежная">
+                </div>
+
+                <div class="pt-4 border-t border-genshin-goldDark/20 flex justify-between items-center">
+                    <button type="button" id="deleteTermBtn" class="px-4 py-2 bg-red-950/60 hover:bg-red-900 border border-red-500/40 text-red-300 font-bold rounded-xl text-xs transition">
+                        <i class="fa-solid fa-trash mr-1"></i> Удалить термин
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" id="cancelEditBtn" class="px-4 py-2 bg-genshin-bg border border-genshin-goldDark/40 text-genshin-gold font-bold rounded-xl text-xs transition">Отмена</button>
+                        <button type="submit" class="px-5 py-2 bg-genshin-goldAccent hover:bg-genshin-goldDark text-genshin-bg font-bold rounded-xl text-xs transition">Сохранить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-genshin-goldDark/20 py-6 text-center text-xs text-genshin-goldDark bg-genshin-bg">
+        <p>Кодекс Тейвата для Настольных Ролевых Игр (D&D / Genshin TTRPG System)</p>
+        <p class="mt-1 opacity-60">Сделано с любовью для Мастера и Игроков</p>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // Initial Default Database
+        const defaultTermsData = [
+            {
+                id: 'eye-of-god',
+                title: 'Глаз Бога',
+                subTitle: 'Vision (神之眼)',
+                category: 'concepts',
+                icon: 'fa-gem',
+                element: 'pyro',
+                summary: 'Магический артефакт, даруемый признанным смертным для управления элементами.',
+                lore: 'Глаз Бога — это внешнее магическое органоподобное устройство, через которое люди Тейвата могут направлять элементальную энергию. Считается, что Селестия дарует Глаз Бога тем, чьи желания и амбиции достигают небес.\n\nКогда владелец умирает, его Глаз Бога теряет цвет и превращается в пустую серую сферу. Если Глаз Бога силой отнять у владельца, человек часто теряет свои ключевые воспоминания, стремления и часть личности, впадая в апатию.',
+                ttrpg: 'В НРИ Глаз Бога служит фокусом заклинаний и источником элементальных способностей персонажа. Потеря Глаза Бога налагает сильные штрафы на ментальные характеристики и лишает возможности использовать элементальные навыки.',
+                tags: ['Артефакт', 'Магия', 'Элементы', 'Амбиции']
+            },
+            {
+                id: 'adepti',
+                title: 'Адепты',
+                subTitle: 'Adepti (仙人 - Сяньжэнь)',
+                category: 'entities',
+                icon: 'fa-dragon',
+                element: 'geo',
+                summary: 'Могущественные святые сущности Ли Юэ, заключившие контракт с Гео Архонтом.',
+                lore: 'Адепты — это древняя раса мифических магических существ и просветленных людей Ли Юэ. Большинство из них имеют звериный облик (журавли, олени, олени-кинины), но способны принимать человеческую форму.\n\nОни обладают "Внутренним Глазом" и собственной магией (Искусством Адептов), способной создавать карманные измерения (как Чайник Безмятежности). Они связаны священным контрактом защищать Ли Юэ от древних демонов и богов.',
+                ttrpg: 'В игре Адепты выступают как полубожественные NPC, покровители или боссы. Их магия не подчиняется стандартным правилам Глаза Бога. Они способны даровать могущественные артефакты или обучать древним техникам.',
+                tags: ['Ли Юэ', 'Защитники', 'Древние', 'Бессмертные']
+            },
+            {
+                id: 'archons',
+                title: 'Архонты (Семёрка)',
+                subTitle: 'The Seven Archons (칠신)',
+                category: 'entities',
+                icon: 'fa-crown',
+                element: 'anemo',
+                summary: 'Семь богов, правящих семью регионами Тейвата.',
+                lore: 'Архонты — семь сильнейших божеств, победивших в Войне Богов 2000 лет назад. Каждый Архонт резонирует с определенным элементом и правит своим королевством (Анемо — Мондштадт, Гео — Ли Юэ, Электро — Иназума и т.д.).\n\nИх сила напрямую зависит от того, насколько сильно они управляют своей нацией и как сильно в них верят жители. Каждому Архонту Селестией выдано "Сердце Бога" (Gnosis).',
+                ttrpg: 'Архонты в D&D — это сущности уровня высших божеств или аватаров. Они способны изменять ландшафт континентов. Отношения с Архонтом региона могут кардинально менять сюжет кампании.',
+                tags: ['Боги', 'Семерка', 'Правители', 'Сердце Бога']
+            },
+            {
+                id: 'celestia',
+                title: 'Селестия',
+                subTitle: 'Celestia (天空岛)',
+                category: 'concepts',
+                icon: 'fa-globe',
+                element: 'cryo',
+                summary: 'Парящий в небесах остров богов, высшая власть над Тейватом.',
+                lore: 'Селестия — загадочный парящий остров, видимый из любой точки Тейвата. Это обитель Высших Богов и Хранителей Миропорядка. Именно Селестия устанавливает законы мира, дарует Глаза Бога и карает цивилизации, узнавшие лишнее (как это произошло с Каэнри\'ах и Драконьим Хребтом).\n\nСмертные, совершившие великие подвиги, теоретически могут вознестись на Селестию и стать богами.',
+                ttrpg: 'Высший антагонистический или наблюдательный орган мироздания. Селестия отправляет "Шипы Небес" для уничтожения скверны или неугодных королевств.',
+                tags: ['Космология', 'Небеса', 'Суд', 'Божества']
+            },
+            {
+                id: 'ley-lines',
+                title: 'Артерии Земли',
+                subTitle: 'Ley Lines (지맥)',
+                category: 'concepts',
+                icon: 'fa-scroll',
+                element: 'dendro',
+                summary: 'Нервная система мира, хранящая все воспоминания и элементальную энергию.',
+                lore: 'Артерии Земли — это невидимая сеть магических каналов, пронизывающая весь Тейват. Они произрастают от Ирминсуля (древа мира). Артерии переносят элементальную энергию и хранят память обо всем, что когда-либо происходило в мире.\n\nСбои в артериях приводят к материализации монстров, аномалиям погоды и появлению "Цветов Озарения" или "Цветов Богатства".',
+                ttrpg: 'Используется как источник элементальных аномалий на карте. Игроки могут медитировать у Артерий для получения опыта, сбора ресурсов или восстановления сил.',
+                tags: ['Ирминсуль', 'Память', 'Магия Земли', 'Аномалии']
+            },
+            {
+                id: 'elemental-reactions',
+                title: 'Элементальные Реакции',
+                subTitle: 'Elemental Reactions',
+                category: 'elements',
+                icon: 'fa-wand-magic-sparkles',
+                element: 'hydro',
+                summary: 'Взаимодействие двух и более элементов, вызвающее особые эффекты.',
+                lore: 'Природа Тейвата пронизана 7 элементами (Пиро, Гидро, Анемо, Электро, Дендро, Крио, Гео). Когда один элемент накладывается на другой, происходит физико-магическая реакция.\n\nНапример: Пиро + Гидро = Пар (усиленный урон), Крио + Гидро = Заморозка (контроль), Электро + Пиро = Перегрузка (взрыв).',
+                ttrpg: 'Главная механика боя в Тейват-НРИ! Накладывая статусы на врагов (например, "Мокрый"), игроки могут комбинировать атаки для нанесения катастрофического урона или наложения контроля.',
+                tags: ['Бой', 'Комбо', 'Статусы', 'Магия']
+            },
+            {
+                id: 'fatui',
+                title: 'Фатуи и Предвестники',
+                subTitle: 'The Fatui & Harbingers (愚人众)',
+                category: 'factions',
+                icon: 'fa-shield-halberd',
+                element: 'pyro',
+                summary: 'Военно-дипломатическая организация Снежной под предводительством Царицы.',
+                lore: 'Фатуи — мощная дипломатическая и военная фракция из Снежной (Крио регион). Официально они занимаются торговлей и посольскими делами, неофициально — шпионажем, шантажом и использованием "Глаз Порчи".\n\nОрганизацию возглавляют 11 Предвестников Фатуи — невероятно сильные индивиды, стремящиеся отобрать Сердца Бога у всех Архонтов для броска вызова Селестии.',
+                ttrpg: 'Идеальные антагонисты или сложные серые союзники. Оперативники Фатуи используют технологичные Глаза Порчи, дающие магию в обмен на здоровье и жизненную силу.',
+                tags: ['Снежная', 'Враги', 'Дипломатия', 'Глаз Порчи']
+            },
+            {
+                id: 'abyss',
+                title: 'Орден Бездны',
+                subTitle: 'Abyss Order (심연 교단)',
+                category: 'factions',
+                icon: 'fa-skull',
+                element: 'electro',
+                summary: 'Враждебная человечеству фракция монстров, порожденная древней катастрофой.',
+                lore: 'Орден Бездны состоит из трансформированных жителей древнего подземного королевства Каэнри\'ах, уничтоженного 500 лет назад. Включает Магов Бездны, Вестников и Гончих Скверны.\n\nИх цель — уничтожить Семь Архонтов и свергнуть власть Селестии, вернув мир к первозданному хаосу. Они используют тьму Бездны — энергию, чуждую элементам Тейвата.',
+                ttrpg: 'Основные монстры-враги для опасных подземелий. Энергия Бездны отравляет игроков и не поддается обычным элементальным законам.',
+                tags: ['Бездна', 'Каэнри\'ах', 'Монстры', 'Тьма']
+            },
+            {
+                id: 'delusion',
+                title: 'Глаз Порчи',
+                subTitle: 'Delusion (邪眼)',
+                category: 'concepts',
+                icon: 'fa-bolt',
+                element: 'pyro',
+                summary: 'Искусственный аналог Глаза Бога, созданный Фатуи из останков древних богов.',
+                lore: 'Глаз Порчи дарует элементальную силу даже тем, кто не был избран Селестией. Однако за эту силу приходится платить огромную цену: использование Глаза Порчи высасывает жизненную энергию владельца, стремительно старя его или вызывая мутации.',
+                ttrpg: 'Опасный артефакт. Дает игроку мощный заплыв урона/магии, но каждый ход или использование наносит урон по максимальному HP персонажа или накладывает истощение.',
+                tags: ['Фатуи', 'Запретное', 'Артефакт', 'Опасность']
+            },
+            {
+                id: 'gnosis',
+                title: 'Сердце Бога',
+                subTitle: 'Gnosis (神心)',
+                category: 'concepts',
+                icon: 'fa-crown',
+                element: 'geo',
+                summary: 'Божественный инструмент, связывающий Архонта напрямую с Селестией.',
+                lore: 'Сердце Бога внешне напоминает шахматную фигуру. Оно служит доказательством статуса Архонта и дает ему доступ к колоссальной божественной энергии Селестии (например, Моракс использовал его для чеканки Моры).\n\nВсе 7 Сердец Бога сейчас являются главной целью Царицы и Фатуи.',
+                ttrpg: 'Предмет легендарного уровня artifact. Обладание им дарует власть над элементальной тканью целого региона.',
+                tags: ['Архонты', 'Селестия', 'Реликвия', 'Шахматы']
+            },
+            {
+                id: 'yokai',
+                title: 'Йокаи',
+                subTitle: 'Youkai (요괴)',
+                category: 'entities',
+                icon: 'fa-ghost',
+                element: 'electro',
+                summary: 'Сверхъестественные существа и духи Иназумы.',
+                lore: 'Йокаи — нечеловеческие разумные существа Иназумы, обладающие магией. К ним относятся Кицунэ (лисы-оборотни), Они (демоны-воины), Тенгу (крылатые стражи), Тануки и духи природы.\n\nОни живут бок о бок с людьми, хотя многие древние кланы йокаев угасли после Великого Бедствия 500 лет назад.',
+                ttrpg: 'Отличный выбор для игровых рас (например, Они — бонус к Силе/Телосложению, Кицунэ — к Магии/Харизме) или уникальных NPC.',
+                tags: ['Иназума', 'Расы', 'Духи', 'Япония']
+            },
+            {
+                id: 'mora',
+                title: 'Мора',
+                subTitle: 'Mora (摩拉)',
+                category: 'concepts',
+                icon: 'fa-coins',
+                element: 'geo',
+                summary: 'Универсальная валюта Тейвата и катализатор для алхимии.',
+                lore: 'Мора — единая валюта, принимаемая во всем Тейвате. Она названа в честь Гео Архонта Моракса (Чжун Ли), который создавал её из своей божественной плоти.\n\nМора — это не просто монеты, а физический катализатор элементальной энергии, именно поэтому она используется в алхимии, ковке и улучшении предметов.',
+                ttrpg: 'Основная валюта D&D кампании. Заменяет золотые/серебряные монеты. Также необходима как компонент для ритуалов Алхимии.',
+                tags: ['Деньги', 'Экономика', 'Алхимия', 'Моракс']
+            }
+        ];
+
+        // State Management
+        let termsData = loadTermsData();
+        let activeCategory = 'all';
+        let searchQuery = '';
+        let favorites = JSON.parse(localStorage.getItem('genshin_favs') || '[]');
+        let isGmMode = false;
+        let currentModalTermId = null;
+
+        // Element Colors Mapping
+        const elementColors = {
+            pyro: { bg: 'bg-genshin-pyro/20', border: 'border-genshin-pyro', text: 'text-genshin-pyro', badge: 'bg-genshin-pyro text-white' },
+            hydro: { bg: 'bg-genshin-hydro/20', border: 'border-genshin-hydro', text: 'text-genshin-hydro', badge: 'bg-genshin-hydro text-black' },
+            anemo: { bg: 'bg-genshin-anemo/20', border: 'border-genshin-anemo', text: 'text-genshin-anemo', badge: 'bg-genshin-anemo text-black' },
+            electro: { bg: 'bg-genshin-electro/20', border: 'border-genshin-electro', text: 'text-genshin-electro', badge: 'bg-genshin-electro text-white' },
+            dendro: { bg: 'bg-genshin-dendro/20', border: 'border-genshin-dendro', text: 'text-genshin-dendro', badge: 'bg-genshin-dendro text-black' },
+            cryo: { bg: 'bg-genshin-cryo/20', border: 'border-genshin-cryo', text: 'text-genshin-cryo', badge: 'bg-genshin-cryo text-black' },
+            geo: { bg: 'bg-genshin-geo/20', border: 'border-genshin-geo', text: 'text-genshin-geo', badge: 'bg-genshin-geo text-black' }
+        };
+
+        const categoryNames = {
+            concepts: 'Понятие мира',
+            entities: 'Бог / Сущность',
+            elements: 'Элемент / Механика',
+            factions: 'Фракция / Группа'
+        };
+
+        // DOM Elements
+        const termsGrid = document.getElementById('termsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        const favCountEl = document.getElementById('favCount');
+        const detailModal = document.getElementById('detailModal');
+        const editModal = document.getElementById('editModal');
+        const termForm = document.getElementById('termForm');
+        const toggleGmBtn = document.getElementById('toggleGmModeBtn');
+        const gmStatusText = document.getElementById('gmModeStatusText');
+        const addNewTermBtn = document.getElementById('addNewTermBtn');
+        const resetDataBtn = document.getElementById('resetDataBtn');
+        const modalEditBtn = document.getElementById('modalEditBtn');
+        const deleteTermBtn = document.getElementById('deleteTermBtn');
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            updateFavCount();
+            renderTerms();
+            setupEventListeners();
+        });
+
+        // Load & Save Logic
+        function loadTermsData() {
+            const saved = localStorage.getItem('genshin_terms_custom');
+            if (saved) {
+                try { return JSON.parse(saved); } catch(e) { return defaultTermsData; }
+            }
+            return defaultTermsData;
+        }
+
+        function saveTermsData() {
+            localStorage.setItem('genshin_terms_custom', JSON.stringify(termsData));
+        }
+
+        // Event Listeners Setup
+        function setupEventListeners() {
+            // Category Filter Click
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        b.classList.remove('bg-genshin-goldAccent', 'text-genshin-bg');
+                        b.classList.add('bg-genshin-card', 'text-genshin-gold');
+                    });
+
+                    const target = e.currentTarget;
+                    target.classList.remove('bg-genshin-card', 'text-genshin-gold');
+                    target.classList.add('bg-genshin-goldAccent', 'text-genshin-bg');
+
+                    activeCategory = target.dataset.category;
+                    renderTerms();
+                });
+            });
+
+            // Search Input Listener
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase().trim();
+                clearSearch.classList.toggle('hidden', searchQuery === '');
+                renderTerms();
+            });
+
+            // Clear Search
+            clearSearch.addEventListener('click', () => {
+                searchInput.value = '';
+                searchQuery = '';
+                clearSearch.classList.add('hidden');
+                renderTerms();
+            });
+
+            // Modal Close Controls
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) closeModal();
+            });
+
+            // GM Edit Modal Controls
+            document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+            document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
+            
+            // Random Term Button
+            document.getElementById('randomTermBtn').addEventListener('click', () => {
+                if (termsData.length === 0) return;
+                const randomIndex = Math.floor(Math.random() * termsData.length);
+                openModal(termsData[randomIndex].id);
+            });
+
+            // Toggle GM Mode
+            toggleGmBtn.addEventListener('click', () => {
+                isGmMode = !isGmMode;
+                if (isGmMode) {
+                    toggleGmBtn.classList.remove('border-genshin-goldDark/50', 'bg-genshin-card');
+                    toggleGmBtn.classList.add('border-amber-400', 'bg-amber-950/40', 'text-amber-300');
+                    gmStatusText.textContent = 'Режим ГМ: Вкл';
+                    addNewTermBtn.classList.remove('hidden');
+                    resetDataBtn.classList.remove('hidden');
+                    resetDataBtn.classList.add('flex');
+                } else {
+                    toggleGmBtn.classList.add('border-genshin-goldDark/50', 'bg-genshin-card');
+                    toggleGmBtn.classList.remove('border-amber-400', 'bg-amber-950/40', 'text-amber-300');
+                    gmStatusText.textContent = 'Режим ГМ: Выкл';
+                    addNewTermBtn.classList.add('hidden');
+                    resetDataBtn.classList.add('hidden');
+                    resetDataBtn.classList.remove('flex');
+                }
+                renderTerms();
+            });
+
+            // Add New Term
+            addNewTermBtn.addEventListener('click', () => {
+                openEditModal(null);
+            });
+
+            // Reset Data
+            resetDataBtn.addEventListener('click', () => {
+                if (confirm('Вы уверены, что хотите сбросить все термины к начальным настройкам? Все созданные/измененные термины будут удалены.')) {
+                    termsData = [...defaultTermsData];
+                    saveTermsData();
+                    renderTerms();
+                }
+            });
+
+            // Form Submit (Create / Edit)
+            termForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const termId = document.getElementById('formTermId').value || ('term-' + Date.now());
+                const tagsRaw = document.getElementById('formTags').value;
+                
+                const updatedTerm = {
+                    id: termId,
+                    title: document.getElementById('formTitle').value.trim(),
+                    subTitle: document.getElementById('formSubTitle').value.trim(),
+                    category: document.getElementById('formCategory').value,
+                    element: document.getElementById('formElement').value,
+                    icon: document.getElementById('formIcon').value,
+                    summary: document.getElementById('formSummary').value.trim(),
+                    lore: document.getElementById('formLore').value.trim(),
+                    ttrpg: document.getElementById('formTtrpg').value.trim(),
+                    tags: tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : ['Общее']
+                };
+
+                const index = termsData.findIndex(t => t.id === termId);
+                if (index >= 0) {
+                    termsData[index] = updatedTerm;
+                } else {
+                    termsData.unshift(updatedTerm);
+                }
+
+                saveTermsData();
+                closeEditModal();
+                renderTerms();
+            });
+
+            // Delete Term
+            deleteTermBtn.addEventListener('click', () => {
+                const termId = document.getElementById('formTermId').value;
+                if (!termId) return;
+                
+                if (confirm('Вы действительно хотите удалить этот термин?')) {
+                    termsData = termsData.filter(t => t.id !== termId);
+                    favorites = favorites.filter(id => id !== termId);
+                    localStorage.setItem('genshin_favs', JSON.stringify(favorites));
+                    saveTermsData();
+                    updateFavCount();
+                    closeEditModal();
+                    closeModal();
+                    renderTerms();
+                }
+            });
+
+            // Edit from detail modal
+            modalEditBtn.addEventListener('click', () => {
+                if (currentModalTermId) {
+                    closeModal();
+                    openEditModal(currentModalTermId);
+                }
+            });
+        }
+
+        // Render Cards
+        function renderTerms() {
+            termsGrid.innerHTML = '';
+
+            const filtered = termsData.filter(term => {
+                const matchesCategory = 
+                    activeCategory === 'all' ? true :
+                    activeCategory === 'favorites' ? favorites.includes(term.id) :
+                    term.category === activeCategory;
+
+                const matchesSearch = 
+                    term.title.toLowerCase().includes(searchQuery) ||
+                    term.subTitle.toLowerCase().includes(searchQuery) ||
+                    term.summary.toLowerCase().includes(searchQuery) ||
+                    term.tags.some(tag => tag.toLowerCase().includes(searchQuery));
+
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filtered.forEach(term => {
+                    const isFav = favorites.includes(term.id);
+                    const colorStyle = elementColors[term.element] || elementColors.geo;
+
+                    const card = document.createElement('div');
+                    card.className = `genshin-border bg-genshin-card/90 hover:bg-genshin-cardHover rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between relative group`;
+                    
+                    card.innerHTML = `
+                        <div>
+                            <!-- Header / Badge -->
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-genshin-bg flex items-center justify-center text-lg ${colorStyle.text} border border-genshin-goldDark/30">
+                                        <i class="fa-solid ${term.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] uppercase tracking-wider text-genshin-goldDark font-bold block">${categoryNames[term.category] || 'Термин'}</span>
+                                        <h3 class="font-title font-bold text-lg text-genshin-gold group-hover:text-genshin-goldAccent transition-colors leading-tight">${term.title}</h3>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    ${isGmMode ? `
+                                        <button class="quick-edit-btn text-genshin-goldDark hover:text-amber-300 p-1 transition" title="Редактировать термин">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                    ` : ''}
+                                    <button class="fav-toggle text-genshin-goldDark hover:text-amber-400 p-1 transition" data-id="${term.id}">
+                                        <i class="${isFav ? 'fa-solid text-amber-400' : 'fa-regular'} fa-star text-base"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p class="text-xs text-genshin-goldDark italic mb-2">${term.subTitle || ''}</p>
+                            
+                            <!-- Summary -->
+                            <p class="text-xs text-genshin-gold/80 leading-relaxed line-clamp-3 mb-4">
+                                ${term.summary}
+                            </p>
+                        </div>
+
+                        <!-- Footer Tags & Action -->
+                        <div>
+                            <div class="flex flex-wrap gap-1.5 mb-4">
+                                ${term.tags.map(t => `<span class="px-2 py-0.5 rounded-md bg-genshin-bg/80 border border-genshin-goldDark/20 text-[10px] text-genshin-goldDark">${t}</span>`).join('')}
+                            </div>
+                            
+                            <div class="pt-3 border-t border-genshin-goldDark/20 flex items-center justify-between text-xs text-genshin-goldAccent font-semibold">
+                                <span>Подробнее в лоре</span>
+                                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    `;
+
+                    // Card Click
+                    card.addEventListener('click', (e) => {
+                        if (!e.target.closest('.fav-toggle') && !e.target.closest('.quick-edit-btn')) {
+                            openModal(term.id);
+                        }
+                    });
+
+                    // Quick Edit Click
+                    const quickEdit = card.querySelector('.quick-edit-btn');
+                    if (quickEdit) {
+                        quickEdit.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openEditModal(term.id);
+                        });
+                    }
+
+                    // Favorite button inside card
+                    card.querySelector('.fav-toggle').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleFav(term.id);
+                    });
+
+                    termsGrid.appendChild(card);
+                });
+            }
+        }
+
+        // Modal Functionality
+        function openModal(id) {
+            const term = termsData.find(t => t.id === id);
+            if (!term) return;
+
+            currentModalTermId = id;
+            const colorStyle = elementColors[term.element] || elementColors.geo;
+            const isFav = favorites.includes(term.id);
+
+            document.getElementById('modalIcon').className = `w-14 h-14 rounded-2xl bg-genshin-bg border border-genshin-goldDark/40 flex items-center justify-center text-2xl ${colorStyle.text}`;
+            document.getElementById('modalIcon').innerHTML = `<i class="fa-solid ${term.icon}"></i>`;
+            document.getElementById('modalCategory').textContent = categoryNames[term.category] || 'Термин';
+            
+            document.getElementById('modalTitle').textContent = term.title;
+            document.getElementById('modalSub').textContent = term.subTitle || '';
+            document.getElementById('modalSummary').textContent = term.summary;
+            document.getElementById('modalLore').textContent = term.lore;
+            document.getElementById('modalTtrpg').textContent = term.ttrpg;
+
+            // GM Edit button in modal
+            if (isGmMode) {
+                modalEditBtn.classList.remove('hidden');
+                modalEditBtn.classList.add('flex');
+            } else {
+                modalEditBtn.classList.add('hidden');
+                modalEditBtn.classList.remove('flex');
+            }
+
+            // Render Modal Tags
+            const modalTags = document.getElementById('modalTags');
+            modalTags.innerHTML = term.tags.map(t => `<span class="px-2.5 py-1 rounded-lg bg-genshin-bg border border-genshin-goldDark/30 text-xs text-genshin-goldDark font-medium">#${t}</span>`).join('');
+
+            // Fav Button State
+            const favBtn = document.getElementById('modalFavBtn');
+            favBtn.innerHTML = isFav 
+                ? `<i class="fa-solid fa-star text-amber-400"></i> В избранном`
+                : `<i class="fa-regular fa-star"></i> В избранное`;
+            
+            favBtn.onclick = () => {
+                toggleFav(term.id);
+                openModal(term.id);
+            };
+
+            detailModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            detailModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            currentModalTermId = null;
+        }
+
+        // Open GM Create / Edit Modal
+        function openEditModal(id = null) {
+            if (id) {
+                const term = termsData.find(t => t.id === id);
+                if (!term) return;
+
+                document.getElementById('editModalTitle').textContent = 'Редактирование термина';
+                document.getElementById('formTermId').value = term.id;
+                document.getElementById('formTitle').value = term.title;
+                document.getElementById('formSubTitle').value = term.subTitle || '';
+                document.getElementById('formCategory').value = term.category;
+                document.getElementById('formElement').value = term.element;
+                document.getElementById('formIcon').value = term.icon;
+                document.getElementById('formSummary').value = term.summary;
+                document.getElementById('formLore').value = term.lore;
+                document.getElementById('formTtrpg').value = term.ttrpg;
+                document.getElementById('formTags').value = term.tags ? term.tags.join(', ') : '';
+                deleteTermBtn.classList.remove('hidden');
+            } else {
+                document.getElementById('editModalTitle').textContent = 'Добавление нового термина';
+                termForm.reset();
+                document.getElementById('formTermId').value = '';
+                deleteTermBtn.classList.add('hidden');
+            }
+
+            editModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Favorites Handling
+        function toggleFav(id) {
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(favId => favId !== id);
+            } else {
+                favorites.push(id);
+            }
+            localStorage.setItem('genshin_favs', JSON.stringify(favorites));
+            updateFavCount();
+            renderTerms();
+        }
+
+        function updateFavCount() {
+            favCountEl.textContent = favorites.length;
+        }
+    </script>
+</body>
+</html>
